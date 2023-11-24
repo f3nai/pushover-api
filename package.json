@@ -1,0 +1,20 @@
+{
+  "name": "pushover-api",
+  "version": "1.0.0",
+  "description": "Package for interacting with Pushover",
+  "main": "build/index.js",
+  "scripts": {
+    "localbuild": "tsc && npm link"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/f3nai/pushover-api.git"
+  },
+  "keywords": [],
+  "author": "f3nai",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.2",
+    "typescript": "^5.3.2"
+  }
+}
