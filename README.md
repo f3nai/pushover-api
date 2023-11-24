@@ -8,21 +8,26 @@ const { PushClient } = require("pushover-api")
 
 let Credentials = {
     token: "APPLICATION TOKEN HERE",
-    user: "USER KEY HERE"
+    user: "USER TOKEN HERE"
 }
 
 const Client = new PushClient(Credentials)
 
-const Data = {
-    title: "Test",
-    message: "Hey",
-    priority: "NORMAL" // LOWEST, LOW, NORMAL, HIGH, EMERGENCY
-}
-const result = Client.send(Data)
+async function sendMessage(message) {
+    const Data = {
+        title: "Notifications Test",
+        message: message,
 
-if (result) {
-    console.log("Sent successfully!")
+        priority: "NORMAL"
+    }
+    const result = await Client.send(Data)
+    
+    if ((await result) == true) {
+        console.log("Sent successfully!")
+    }
 }
+
+sendMessage("hii this should work!")
 ```
 
 Outputs 'Sent Successfully' if provided credentials are valid

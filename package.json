@@ -1,6 +1,6 @@
 {
   "name": "pushover-api",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "Package for interacting with Pushover",
   "main": "build/index.js",
   "scripts": {
