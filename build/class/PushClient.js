@@ -82,26 +82,19 @@ class PushClient {
             }
         });
     }
-    send(content, device) {
+    send(params) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { title, message, priority } = content;
-            let DataToTransmit = {
-                // ## Credentials
-                token: this.settings.token,
-                user: this.settings.user,
-                // ## Data
-                title: title || null,
-                message: message,
-                priority: (0, Priority_1.default)(priority.toString()),
-                device: device || null,
-            };
-            if (DataToTransmit.priority == 2) {
+            let sending = params;
+            if (sending.priority) {
+                sending.priority = (0, Priority_1.default)(sending.priority);
+            }
+            if (sending.priority == 2 && !sending.retry && !sending.expire) {
                 // The api requires for us to add 'retry' and 'expire' parameters if its an emergency priority notification
-                DataToTransmit.retry = this.config.emergency.retry;
-                DataToTransmit.expire = this.config.emergency.expire;
+                sending.retry = this.config.emergency.retry;
+                sending.expire = this.config.emergency.expire;
             }
             try {
-                const SendRequest = yield axios_1.default.post(api_urls.PUSH_MSG, DataToTransmit);
+                const SendRequest = yield axios_1.default.post(api_urls.PUSH_MSG, sending);
                 const data = yield SendRequest.data;
                 if (data.status == 1)
                     return true;
