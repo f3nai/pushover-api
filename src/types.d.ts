@@ -15,6 +15,29 @@ export interface PushClientExtraConfig {
     }
 }
 
+export interface SendingMessage {
+    // Required
+    token: string
+    user: string
+    message: string
+    // Optional stuff
+    attachment?: BinaryData
+    attachment_base64?: any // base64 i couldnt find the type for it..
+    attachment_type?: any // same thing but idk the type
+    device?: string
+    html?: boolean
+    priority?: number | Priority | PriorityEnum
+    sound?: string
+    timestamp?: any // unix timestamp
+    title?: string
+    ttl?: number // time to live
+    url?: string
+    url_title?: string
+    // Emergency alert
+    retry?: number
+    expire?: number
+}
+
 export class PushClient{
     // Initialize class
     constructor({token: string, user: string})

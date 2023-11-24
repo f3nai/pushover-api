@@ -5,10 +5,15 @@ Contributors:
 
 */
 
-import { Priority, ApiResponse, PushClientExtraConfig, PriorityEnum } from "../types"
+import { Priority, ApiResponse, PushClientExtraConfig, PriorityEnum, SendingMessage } from "../types"
 import axios from "axios"
 import * as api_urls from "../api.config.json"
 import ConvertPriority from "../functions/Priority"
+
+function throwErr(e: string) {
+    // because if i throw in the code itself it wont run the next code, just use this
+    throw new Error(e)
+}
 
 class PushClient {
     private settings = {
@@ -55,12 +60,18 @@ class PushClient {
         }
     }
 
-    async send(params: any): Promise<boolean> {
+    async send(params: SendingMessage, userToken?: string): Promise<boolean> {
         let sending = params
 
-        if (sending.priority) {
-            sending.priority = ConvertPriority(sending.priority)
+        if (!sending.message) {
+            throwErr("PushClient Error: NOMSG No message was specified. The notification was not sent!")
+            return false
         }
+
+        sending.priority = ConvertPriority(sending.priority)
+
+        sending.token = this.settings.token
+        sending.user = userToken || this.settings.user
 
         if (sending.priority == 2 && !sending.retry && !sending.expire) {
             // The api requires for us to add 'retry' and 'expire' parameters if its an emergency priority notification
@@ -79,7 +90,8 @@ class PushClient {
         } catch (e) {
             let ErrorMessage = "PushClient Error: FAILREQSEND Request failed to send: \n" + e
     
-            throw new Error(ErrorMessage) // Something went wrong!
+            throwErr(ErrorMessage)
+            return false
         }
     }
 }
