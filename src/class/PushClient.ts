@@ -5,10 +5,15 @@ Contributors:
 
 */
 
-import { Priority, ApiResponse, PushClientExtraConfig, PriorityEnum } from "../types"
+import { Priority, ApiResponse, PushClientExtraConfig, PriorityEnum, SendingMessage } from "../types"
 import axios from "axios"
 import * as api_urls from "../api.config.json"
 import ConvertPriority from "../functions/Priority"
+
+function throwErr(e: string) {
+    // because if i throw in the code itself it wont run the next code, just use this
+    throw new Error(e)
+}
 
 class PushClient {
     private settings = {
@@ -22,7 +27,7 @@ class PushClient {
             retry: 30 // in seconds
         }
     }
-    
+
     constructor(input: {token: string, user: string}, config?: PushClientExtraConfig) {
         const { token, user } = input
 
@@ -55,32 +60,28 @@ class PushClient {
         }
     }
 
-    async send(content: {title?: string, message: string, priority: PriorityEnum}, device?: string): Promise<boolean> {
-        const { title, message, priority} = content
+    async send(params: SendingMessage, userToken?: string): Promise<boolean> {
+        let sending = params
 
-        let DataToTransmit: {token: string, user: string, title: string | null, message: string, priority: number, device: string | null, retry?: number, expire?:number} = {
-            // ## Credentials
-
-            token: this.settings.token,
-            user: this.settings.user,
-
-            // ## Data
-            
-            title: title || null,
-            message: message,
-            priority: ConvertPriority(priority.toString()),
-            device: device || null,
+        if (!sending.message) {
+            throwErr("PushClient Error: NOMSG No message was specified. The notification was not sent!")
+            return false
         }
 
-        if (DataToTransmit.priority == 2) {
+        sending.priority = ConvertPriority(sending.priority)
+
+        sending.token = this.settings.token
+        sending.user = userToken || this.settings.user
+
+        if (sending.priority == 2 && !sending.retry && !sending.expire) {
             // The api requires for us to add 'retry' and 'expire' parameters if its an emergency priority notification
 
-            DataToTransmit.retry = this.config.emergency.retry
-            DataToTransmit.expire = this.config.emergency.expire
+            sending.retry = this.config.emergency.retry
+            sending.expire = this.config.emergency.expire
         }
 
         try {
-            const SendRequest = await axios.post(api_urls.PUSH_MSG, DataToTransmit)
+            const SendRequest = await axios.post(api_urls.PUSH_MSG, sending)
             const data: ApiResponse = await SendRequest.data
     
             if (data.status == 1) return true
@@ -89,7 +90,8 @@ class PushClient {
         } catch (e) {
             let ErrorMessage = "PushClient Error: FAILREQSEND Request failed to send: \n" + e
     
-            throw new Error(ErrorMessage) // Something went wrong!
+            throwErr(ErrorMessage)
+            return false
         }
     }
 }

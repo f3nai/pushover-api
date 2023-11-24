@@ -43,6 +43,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 const axios_1 = __importDefault(require("axios"));
 const api_urls = __importStar(require("../api.config.json"));
 const Priority_1 = __importDefault(require("../functions/Priority"));
+function throwErr(e) {
+    // because if i throw in the code itself it wont run the next code, just use this
+    throw new Error(e);
+}
 class PushClient {
     constructor(input, config) {
         this.settings = {
@@ -51,7 +55,7 @@ class PushClient {
         };
         this.config = {
             emergency: {
-                expire: 120,
+                expire: 120, // in seconds
                 retry: 30 // in seconds
             }
         };
@@ -82,26 +86,23 @@ class PushClient {
             }
         });
     }
-    send(content, device) {
+    send(params, userToken) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { title, message, priority } = content;
-            let DataToTransmit = {
-                // ## Credentials
-                token: this.settings.token,
-                user: this.settings.user,
-                // ## Data
-                title: title || null,
-                message: message,
-                priority: (0, Priority_1.default)(priority.toString()),
-                device: device || null,
-            };
-            if (DataToTransmit.priority == 2) {
+            let sending = params;
+            if (!sending.message) {
+                throwErr("PushClient Error: NOMSG No message was specified. The notification was not sent!");
+                return false;
+            }
+            sending.priority = (0, Priority_1.default)(sending.priority);
+            sending.token = this.settings.token;
+            sending.user = userToken || this.settings.user;
+            if (sending.priority == 2 && !sending.retry && !sending.expire) {
                 // The api requires for us to add 'retry' and 'expire' parameters if its an emergency priority notification
-                DataToTransmit.retry = this.config.emergency.retry;
-                DataToTransmit.expire = this.config.emergency.expire;
+                sending.retry = this.config.emergency.retry;
+                sending.expire = this.config.emergency.expire;
             }
             try {
-                const SendRequest = yield axios_1.default.post(api_urls.PUSH_MSG, DataToTransmit);
+                const SendRequest = yield axios_1.default.post(api_urls.PUSH_MSG, sending);
                 const data = yield SendRequest.data;
                 if (data.status == 1)
                     return true;
@@ -110,7 +111,8 @@ class PushClient {
             }
             catch (e) {
                 let ErrorMessage = "PushClient Error: FAILREQSEND Request failed to send: \n" + e;
-                throw new Error(ErrorMessage); // Something went wrong!
+                throwErr(ErrorMessage);
+                return false;
             }
         });
     }

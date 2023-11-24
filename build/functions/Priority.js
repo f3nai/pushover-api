@@ -12,7 +12,7 @@ function ConvertPriority(input) {
         case "EMERGENCY":
             return 2;
         default:
-            throw new Error("PushPriority Error: INVALIDPRSTAT Invalid priority was provided!");
+            return 0;
     }
 }
 module.exports = ConvertPriority;

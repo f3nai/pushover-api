@@ -1,6 +1,6 @@
 import { Priority } from "../types";
 
-function ConvertPriority(input: string): number {
+function ConvertPriority(input: any): number {
     switch(input){
         case "LOWEST":
             return -2
@@ -13,7 +13,7 @@ function ConvertPriority(input: string): number {
         case "EMERGENCY":
             return 2
         default:
-            throw new Error("PushPriority Error: INVALIDPRSTAT Invalid priority was provided!")
+            return 0
     }
 }
 
