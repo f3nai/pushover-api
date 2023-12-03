@@ -55,19 +55,21 @@ class PushClient {
         };
         this.config = {
             emergency: {
-                expire: 120, // in seconds
+                expire: 120,
                 retry: 30 // in seconds
             }
         };
         const { token, user } = input;
         if (!token)
             throw new Error("PushClient Error: Missing TOKEN parameter while initializing!");
-        if (!user)
-            throw new Error("PushClient Error: Missing USER parameter while initializing!");
         if (config) {
             this.config = config;
         }
-        this.settings = input;
+        const appendNewConfig = {
+            token: input.token,
+            user: input.user || ''
+        };
+        this.settings = appendNewConfig;
         this.setup();
     }
     setup() {
@@ -86,7 +88,7 @@ class PushClient {
             }
         });
     }
-    send(params, userToken) {
+    send(params) {
         return __awaiter(this, void 0, void 0, function* () {
             let sending = params;
             if (!sending.message) {
@@ -95,7 +97,8 @@ class PushClient {
             }
             sending.priority = (0, Priority_1.default)(sending.priority);
             sending.token = this.settings.token;
-            sending.user = userToken || this.settings.user;
+            // ability to change user in sending parameters
+            sending.user = params.user || this.settings.user;
             if (sending.priority == 2 && !sending.retry && !sending.expire) {
                 // The api requires for us to add 'retry' and 'expire' parameters if its an emergency priority notification
                 sending.retry = this.config.emergency.retry;

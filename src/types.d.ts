@@ -17,8 +17,8 @@ export interface PushClientExtraConfig {
 
 export interface SendingMessage {
     // Required
-    token: string
-    user: string
+    token?: string
+    user?: string
     message: string
     // Optional stuff
     attachment?: BinaryData
