@@ -5,7 +5,7 @@ export interface ApiResponse {
     request: string
 }
 
-export type Priority = "LOWEST" | "LOW" | "NORMAL" | "HIGH" | "EMERGENCY"
+export type Priority = "LOWEST" | "LOW" | "NORMAL" | "HIGH" | "EMERGENCY" | -2 | -1 | 0 | 1 | 2
 export enum PriorityEnum {"LOWEST", "LOW" , "NORMAL" , "HIGH" , "EMERGENCY"}
 
 export interface PushClientExtraConfig {

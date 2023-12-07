@@ -12,6 +12,8 @@ function ConvertPriority(input: any): number {
             return 1
         case "EMERGENCY":
             return 2
+        case typeof input == "number" && input >= -3 && input <= 2:
+            return input
         default:
             return 0
     }
